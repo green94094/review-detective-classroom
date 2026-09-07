@@ -1,35 +1,48 @@
-export type Review = { id:string; place:number; author:string; stars:number; text:string; time:string; fake:boolean; evidence:string; clue:string };
+export type Decision = 'keep' | 'remove' | 'hold';
+export type Evidence = {label:string; text:string};
+export type Review = {id:string; place:number; author:string; stars:number; text:string; date:string; evidence:Evidence[]; decisive:number; verdict:Decision; explanation:string; reported?:boolean};
 export const places = [
- {name:'구름마을 순두부',menu:'순두부',code:'A',real:[...Array(6).fill(1),...Array(6).fill(2)],fake:38,attack:5},
- {name:'파도별 생선구이',menu:'생선구이',code:'B',real:[...Array(14).fill(5),...Array(6).fill(4)],fake:30,attack:1},
- {name:'솔바람 국수집',menu:'잔치국수',code:'C',real:Array(44).fill(4),fake:6,attack:5},
- {name:'달빛 감자식당',menu:'감자전',code:'D',real:[...Array(35).fill(4),...Array(9).fill(3)],fake:6,attack:5},
- {name:'초록지붕 김밥',menu:'김밥',code:'E',real:[...Array(22).fill(4),...Array(23).fill(3)],fake:5,attack:5},
- {name:'바다우체통 분식',menu:'떡볶이',code:'F',real:[...Array(9).fill(4),...Array(36).fill(3)],fake:5,attack:1}
+ {id:0,name:'구름마을 순두부',menu:'순두부 정식',price:9000,tag:'따뜻한 한 끼',color:'#bd601b',summary:'“반찬도 다양하고 기다리지 않고 먹었어요.”',facts:['순두부 정식에 9,000원을 냈어요.','주문 후 20분을 기다렸어요.','메뉴 사진과 달리 반찬은 두 가지였어요.'],feeling:'국물이 내 입맛에는 짰고, 음식이 미지근해서 아쉬웠어요.',unknown:'다른 날의 대기 시간이나 다른 손님의 입맛은 알 수 없어요.'},
+ {id:1,name:'파도별 생선구이',menu:'고등어구이 정식',price:10000,tag:'든든한 한 끼',color:'#2452cf',summary:'“비린내가 심해요. 여기 가지 마세요.”',facts:['고등어구이 정식에 10,000원을 냈어요.','주문 후 10분 뒤 음식이 나왔어요.','가시가 있는 고등어와 밥 한 공기가 나왔어요.'],feeling:'나는 생선이 고소해서 좋았지만, 가시를 발라 먹는 건 번거로웠어요.',unknown:'생선을 싫어하는 친구도 좋아할지는 알 수 없어요.'},
+ {id:2,name:'솔바람 국수집',menu:'잔치국수',price:7000,tag:'가볍게 한 끼',color:'#427456',summary:'“국물이 담백해요. 많이 먹는 사람은 양이 적을 수 있어요.”',facts:['잔치국수 한 그릇에 7,000원을 냈어요.','주문 후 5분 뒤 국수가 나왔어요.','양념장은 따로 나왔어요.'],feeling:'나는 국물이 담백해서 좋았어요. 한 그릇을 먹고도 조금 더 먹고 싶었어요.',unknown:'모든 사람에게 양이 부족한지는 알 수 없어요.'}
 ];
-const pos=['여기만이 진짜 맛집! 무조건 추천합니다!','최고!','인생맛집! 세상에서 제일 맛있음! 무조건 가세요!','여기만이 진짜 맛집! 무조건 추천합니다!'];
-const neg=['절대 가지 마세요! 여기만 빼고 다 좋아요!','최악!','한 입도 못 먹겠어요. 모두 별점 1점 주세요!','절대 가지 마세요! 여기만 빼고 다 좋아요!'];
-const detail=['직원이 메뉴를 설명해 주었어요.','창가 자리에 앉았어요.','점심에 가족과 다녀왔어요.','주문하고 10분 정도 기다렸어요.','물은 직접 가져다 마셨어요.','둘이 가서 한 접시를 나눠 먹었어요.'];
-export const reviews:Review[]=places.flatMap((p,k)=>{
- const real:Review[]=p.real.map((s,i)=>({id:`${p.code}-${i+1}`,place:k,author:`여행자 ${String((i*17+k*11)%97+1).padStart(2,'0')}`,stars:s,
- text:i===3?(s<=2?'아쉬워요!':'맛있어요!'):`${p.menu}${s<=2?'가 제 입에는 짜고 식어 있었어요.':s===3?'는 무난했어요. 양이 조금 아쉬웠어요.':s===4?'가 따뜻하고 맛있었어요.': '가 잘 익었고 양도 넉넉했어요.'} ${detail[i%detail.length]}`,
- time:`09.${String(i%24+1).padStart(2,'0')} ${i===3?'03:12':`${11+i%9}:${String(i*7%60).padStart(2,'0')}`}`,
- fake:false,clue:'경험 확인',evidence:i===3?'연습용 확인 기록: 방문·결제 내용과 본인 경험이 확인되었습니다. 짧은 글을 새벽에 썼지만 조작한 리뷰는 아닙니다.':'연습용 확인 기록: 메뉴 주문 내역과 방문 경험이 확인되었습니다. 다른 사람과 취향이 달라도 이 평가는 남겨야 합니다.'}));
- const fake:Review[]=Array.from({length:p.fake},(_,i)=>({id:`${p.code}-${real.length+i+1}`,place:k,author:`여행자 ${String((i*13+41+k)%97+1).padStart(2,'0')}`,stars:p.attack,text:(p.attack===5?pos:neg)[i%4],time:`09.25 03:${String(i%60).padStart(2,'0')}`,fake:true,clue:i%4===1?'짧은 표현 + 집중 등록':i%4===2?'극단적 표현 + 집중 등록':'반복 문장 + 집중 등록',evidence:p.attack===5?'연습용 조사 기록: 방문하지 않은 사람이 보상을 받고 별점 5점 글을 여러 계정으로 올렸다는 조작 기록이 확인되었습니다.':'연습용 조사 기록: 방문하지 않은 사람이 가게의 평점을 떨어뜨리려고 낮은 별점을 여러 계정으로 올렸다는 조작 기록이 확인되었습니다.'}));
- return [...real,...fake].sort((a,b)=>{const n=(x:Review)=>(Number(x.id.split('-')[1])*19)%53;return n(a)-n(b)});
-});
-export function ranking(data:Review[]){return places.map((p,i)=>{const rs=data.filter(r=>r.place===i);return {...p,index:i,count:rs.length,score:rs.length?rs.reduce((a,r)=>a+r.stars,0)/rs.length:0}}).sort((a,b)=>b.score-a.score||a.index-b.index)}
-export const baseline=ranking(reviews);
-export const truth=ranking(reviews.filter(r=>!r.fake));
-export const lessons=[
- {title:'반복 문장',question:'복사한 듯한 문장 두 개를 찾아보세요.',hint:'서로 다른 사람이 같은 문장을 썼나요? 여러 리뷰를 함께 비교해 보세요.',texts:['국수가 따뜻했어요. 양은 조금 적었어요.','여기만이 진짜 맛집! 무조건 추천합니다!','비 오는 날 가서 감자전을 먹었어요.','여기만이 진짜 맛집! 무조건 추천합니다!','가족과 순두부 두 그릇을 나눠 먹었어요.'],target:[1,3],note:'같은 문장은 복사한 흔적일 수 있어요. 흔한 표현이 우연히 겹칠 수도 있으니 작성 기록을 더 확인해요.'},
- {title:'짧은 표현',question:'경험 정보가 부족한 리뷰 두 개를 찾아보세요.',hint:'무엇을 먹었고 어땠는지 알 수 있나요? 정보가 적은 것과 거짓인 것은 달라요.',texts:['김밥의 채소가 아삭했어요.','굿!','줄이 길었지만 15분 뒤 들어갔어요.','생선구이는 따뜻했지만 조금 짰어요.','최고!'],target:[1,4],note:'짧다는 이유만으로 삭제하면 안 돼요. 실제로 방문한 사람이 짧게 썼을 수도 있어요.'},
- {title:'등록 시간',question:'1분 간격으로 몰려 올라온 리뷰 두 개를 찾아보세요.',hint:'새벽이라는 시간 하나보다 여러 글이 한꺼번에 올라온 패턴을 봐요.',texts:['국수가 맛있었어요.','여기만이 진짜 맛집!','무조건 여기로 가세요!','감자전이 바삭했어요.','저녁에 먹고 이제야 후기 써요.'],times:['09.21 12:10','09.25 03:01','09.25 03:02','09.22 18:30','09.18 03:00'],target:[1,2],note:'새벽에 쓴 진짜 리뷰도 있어요. 같은 날 짧은 시간에 집중된 글은 다른 단서와 함께 조사해요.'},
- {title:'극단적 표현',question:'무조건적인 칭찬·비난 두 개를 찾아보세요.',hint:'가짜는 칭찬일 수도, 비난일 수도 있어요. 구체적인 경험이 있는지 살펴봐요.',texts:['무조건 최고! 세계 1위! 안 가면 후회!','제 입에는 양념이 매웠어요.','김밥이 두툼해서 든든했어요.','절대 가지 마! 모두 1점 줘요!','기다리는 시간이 길어 아쉬웠어요.'],target:[0,3],note:'강한 감정만으로 거짓이라고 단정하지 않아요. 실제 불편을 겪은 사람의 부정적인 평가도 존중해요.'}
+const e=(label:string,text:string):Evidence=>({label,text});
+export const reviews:Review[]=[
+ {id:'A1',place:0,author:'토요일산책',stars:2,date:'9월 12일 13:20',text:'순두부 정식을 주문했어요. 국물이 제 입에는 짰고 반찬이 두 가지라 조금 아쉬웠어요. 다음에는 간을 덜 해 달라고 부탁하고 싶어요.',evidence:[e('방문 기록','같은 날 정식 주문 기록과 방문자가 남긴 식사 메모가 일치해요.'),e('작성 이력','지난달에는 국수집의 좋았던 점과 아쉬웠던 점을 함께 썼어요.')],decisive:0,verdict:'keep',explanation:'이 사건에서는 확인된 방문 경험이에요. 낮은 별점이라도 구체적인 불편을 담은 리뷰는 남겨야 해요.',reported:true},
+ {id:'A2',place:0,author:'배고픈오후',stars:5,date:'9월 14일 03:01',text:'순두부도 부드럽고 반찬도 다양했어요. 자리도 바로 안내받아서 기다리지 않고 먹었네요. 근처에 간다면 다시 들를 생각입니다.',evidence:[e('작성 이력','서로 다른 계정 네 개가 1분 간격으로 이 식당에 5점을 올렸어요.'),e('작성자 확인','작성자가 방문하지 않았으며, 보상을 받고 전달받은 내용을 후기처럼 썼다고 확인했어요.')],decisive:1,verdict:'remove',explanation:'길고 자연스러운 글도 가짜일 수 있어요. 문제는 문장 길이가 아니라, 방문하지 않은 일을 경험한 것처럼 꾸몄다는 점이에요.',reported:true},
+ {id:'A3',place:0,author:'콩콩발자국',stars:1,date:'9월 10일 18:42',text:'20분 기다렸는데 음식이 미지근했어요. 따뜻한 밥을 기대해서 실망했습니다.',evidence:[e('가게 답변','가게가 당일 제공이 늦어졌던 사실을 확인하고 사과했어요.'),e('작성 이력','다른 날 다른 식당에는 4점을 남겼어요.')],decisive:0,verdict:'keep',explanation:'실제 불편을 설명하는 비판이에요. 가게에 불리하다는 이유로 지우면 다음 손님이 참고할 정보가 사라져요.',reported:true},
+ {id:'A4',place:0,author:'별빛한입',stars:5,date:'9월 14일 03:02',text:'인생 순두부! 사진만 봐도 맛이 느껴지네요. 저는 무조건 별 다섯 개 드립니다!',evidence:[e('사진 출처','첨부 사진의 원본은 이 가게가 아닌 다른 지역 식당의 홍보 사진이에요.'),e('작성자 확인','작성자는 직접 먹지 않았으며 다른 식당 사진을 자신의 방문 사진처럼 올렸다고 확인했어요.')],decisive:1,verdict:'remove',explanation:'사진을 보고 기대하는 마음은 표현할 수 있어요. 하지만 먹어본 것처럼 별점을 주고 다른 곳의 사진을 방문 증거로 쓰는 것은 정보를 왜곡해요.'},
+ {id:'A5',place:0,author:'하루한끼',stars:5,date:'9월 14일 03:03',text:'가족 세 명이 함께 갔는데 다들 만족했어요. 아이도 한 그릇을 비웠고 직원분이 친절하게 챙겨 주셨어요. 여행 중 가장 기억에 남는 점심이었습니다.',evidence:[e('주문 자료','이 내용에 해당하는 방문을 확인하지 못했어요. 기록이 없다는 사실만으로 가짜라고 확정할 수는 없어요.'),e('작성 의뢰 기록','조사에서 “방문 없이 가족 식사 후기를 만들어 5점을 올려 달라”는 의뢰와 이 글의 제출 기록이 함께 확인됐어요.')],decisive:1,verdict:'remove',explanation:'구체적인 가족 이야기도 꾸밀 수 있어요. 조작 의뢰와 제출 기록이 연결되어 이 글의 조작이 확인됐어요.'},
+ {id:'A6',place:0,author:'여행메모',stars:5,date:'9월 14일 03:04',text:'아침부터 정성껏 끓인 국물이라 그런지 깊은 맛이 났어요. 다른 메뉴도 다 먹어 보고 싶습니다. 이번 여행 맛집 1등!',evidence:[e('메뉴 정보','가게는 점심부터 문을 열어요. “아침부터 끓였다”는 말 자체는 거짓인지 확인되지 않았어요.'),e('계정 조사','A2와 같은 사람이 운영한 계정이에요. 방문 없이 평점을 올리려고 작성한 글이라는 기록이 확인됐어요.')],decisive:1,verdict:'remove',explanation:'확실한 근거는 조리 시간에 대한 추측이 아니라, 여러 계정을 이용한 별점 조작 기록이에요.'},
+ {id:'B1',place:1,author:'바다걷기',stars:5,date:'9월 11일 12:30',text:'고등어 껍질이 바삭하고 속은 촉촉했어요. 가시는 직접 발라야 하지만 저는 맛있게 먹었습니다. 밥도 따뜻했어요.',evidence:[e('방문 기록','주문한 메뉴, 방문 시간, 작성자의 식사 메모가 서로 일치해요.'),e('사진 출처','작성자가 그날 직접 찍은 고등어 정식 사진이에요.')],decisive:0,verdict:'keep',explanation:'이 사건에서는 실제 방문 경험으로 확인됐어요. 좋았던 점과 가시를 발라야 하는 점이 함께 있어 선택에 도움이 돼요.'},
+ {id:'B2',place:1,author:'미식별',stars:1,date:'9월 14일 02:10',text:'비린내가 심하고 생선이 다 식어서 나왔어요. 한 입 먹고 남겼습니다. 여행 기분만 망쳤네요. 여기 가지 마세요.',evidence:[e('신고 내용','가게가 억울하다고 신고했어요. 신고가 들어왔다는 사실만으로 삭제할 수는 없어요.'),e('작성자 확인','작성자는 이 식당에 간 적이 없고 평점을 낮추려고 불쾌한 경험을 꾸며 썼다고 확인했어요.')],decisive:1,verdict:'remove',explanation:'부정적인 말이어서가 아니라, 실제로 겪지 않은 피해를 꾸몄기 때문에 제외해요. 가게 주인과 다음 손님 모두에게 피해를 줘요.',reported:true},
+ {id:'B3',place:1,author:'새벽기록',stars:5,date:'9월 13일 03:15',text:'맛있게 잘 먹었어요!',evidence:[e('방문 기록','전날 저녁의 실제 주문과 본인의 식사 기록이 확인됐어요.'),e('작성 시간','여행 일정을 마친 뒤 숙소에서 후기를 작성했어요.')],decisive:0,verdict:'keep',explanation:'짧고 새벽에 쓴 글이지만 이 사건에서는 실제 방문 리뷰예요. 길이와 시간만으로 삭제하면 안 돼요.'},
+ {id:'B4',place:1,author:'솔직한접시',stars:1,date:'9월 14일 02:11',text:'주문한 생선 대신 튀김만 줬어요. 항의해도 아무 말이 없더라고요. 이런 식당이 추천에 뜨면 안 됩니다.',evidence:[e('메뉴 확인','가게에는 튀김 메뉴가 없어요. 다만 이것만으로 당일 상황을 모두 알 수는 없어요.'),e('계정 조사','B2 작성자가 추가 계정으로 올린 글이에요. 서로 다른 피해자인 것처럼 내용을 바꿔 쓴 조작 기록이 확인됐어요.')],decisive:1,verdict:'remove',explanation:'여러 손님이 겪은 일처럼 보이게 만든 조작이에요. 같은 문장을 복사하지 않아도 같은 사람이 데이터를 부풀릴 수 있어요.',reported:true},
+ {id:'B5',place:1,author:'느린점심',stars:4,date:'9월 9일 13:05',text:'생선은 고소했어요. 다만 점심시간에는 주변이 시끄러워서 조용히 먹고 싶은 분은 시간을 피해 가면 좋겠어요.',evidence:[e('방문 기록','점심 주문과 작성자의 방문 메모가 일치해요.'),e('가게 답변','당일 단체 손님이 있었다고 답했어요.')],decisive:0,verdict:'keep',explanation:'맛에 대한 느낌과 방문 상황을 구분해 썼어요. 이 사건에서는 실제 경험으로 확인된 유용한 리뷰예요.'},
+ {id:'B6',place:1,author:'한입평가',stars:1,date:'9월 14일 02:12',text:'별 하나도 아깝네요.',evidence:[e('작성 이력','같은 날 B2·B4와 이어서 등록됐어요.'),e('작성 의뢰 기록','방문하지 않고 별점 1점을 올리는 작업에 이 계정이 참여한 기록이 확인됐어요.')],decisive:1,verdict:'remove',explanation:'짧은 비난 때문이 아니라, 방문 없는 낮은 별점 조작이 확인됐기 때문에 제외해요.'},
+ {id:'C1',place:2,author:'면좋아',stars:4,date:'9월 11일 11:40',text:'국물이 담백하고 면이 부드러워요. 저는 양념장을 반 숟갈 넣으니 딱 맞았어요. 자극적인 맛을 좋아하면 조금 심심할 수도 있어요.',evidence:[e('방문 기록','국수 주문과 방문 메모가 확인됐어요.'),e('사진 출처','그날 작성자가 촬영한 국수와 별도 양념장 사진이에요.')],decisive:0,verdict:'keep',explanation:'이 사건에서는 실제 경험이에요. 자신의 취향을 설명해 비슷한 취향의 사람에게 도움을 줘요.'},
+ {id:'C2',place:2,author:'든든파',stars:3,date:'9월 12일 12:50',text:'금방 나와서 좋았는데 제게는 한 그릇이 조금 적었어요. 많이 먹는 편이라 추가 메뉴가 있었으면 했습니다.',evidence:[e('방문 기록','국수 한 그릇을 주문한 기록과 작성자의 식사 메모가 일치해요.'),e('신고 내용','“양이 적다는 말이 마음에 안 든다”는 신고가 들어왔어요.')],decisive:0,verdict:'keep',explanation:'실제 경험과 개인의 식사량을 설명한 글이에요. 마음에 들지 않는 내용이라는 신고는 삭제 근거가 아니에요.',reported:true},
+ {id:'C3',place:2,author:'초록벤치',stars:4,date:'9월 10일 14:10',text:'7천 원에 따뜻한 국수를 먹을 수 있어서 좋았어요. 창가 자리에서 천천히 먹고 나왔습니다.',evidence:[e('방문 기록','결제 금액과 당시 메뉴 가격이 일치하고 방문 메모도 확인됐어요.'),e('작성 이력','한 달에 한두 번 방문한 곳의 기록을 남겼어요.')],decisive:0,verdict:'keep',explanation:'이 사건에서는 확인된 방문 경험이에요. 가격이라는 사실과 만족했다는 느낌이 함께 있어요.'},
+ {id:'C4',place:2,author:'고민중',stars:3,date:'9월 14일 15:20',text:'지난번보다 면이 불어 있었던 것 같아요. 주방이 바빴던 걸까요? 다음에는 조금 덜 익혀 달라고 해 보려고요.',evidence:[e('주문 자료','종이 영수증을 보관하지 않아 방문 기록을 확인하지 못했어요. 현금으로 방문했을 가능성도 있어요.'),e('작성자 확인','추가 확인을 요청했지만 아직 답이 오지 않았어요. 조작을 입증하는 자료도 없어요.')],decisive:1,verdict:'hold',explanation:'지금 자료만으로 진짜인지 가짜인지 정할 수 없어요. 판단을 보류하고 추가 확인을 요청해요. 이 활동에서는 확인 전까지 순위 계산에 남겨요.',reported:true},
+ {id:'C5',place:2,author:'여행짝꿍',stars:4,date:'9월 8일 12:05',text:'친구는 싱겁다고 했는데 저는 담백해서 좋았어요. 같은 음식을 먹어도 느낌이 다르네요.',evidence:[e('방문 기록','두 명의 국수 주문과 당일 방문 메모가 확인됐어요.'),e('메뉴 정보','양념장은 따로 제공해요.')],decisive:0,verdict:'keep',explanation:'취향이 다르다는 것을 솔직하게 드러낸 방문 리뷰예요. 한 사람의 만족이 모두의 만족을 뜻하지는 않아요.'},
+ {id:'C6',place:2,author:'바쁜발걸음',stars:3,date:'9월 7일 11:55',text:'버스 타기 전에 들렀어요. 5분 만에 나와서 시간 맞춰 먹을 수 있었네요. 맛은 무난했습니다.',evidence:[e('방문 기록','주문 시간과 식사 메모가 확인됐어요.'),e('가게 답변','이 시간에는 주문이 적어 바로 제공했다고 답했어요.')],decisive:0,verdict:'keep',explanation:'빠르게 먹고 싶은 사람에게 도움이 되는 경험이에요. 별점이 아주 높지 않아도 쓸모 있는 정보가 될 수 있어요.'}
 ];
-export const scenarios=[
- {q:'가본 적 없는 식당에 별점 5점을 달아 달래요.',options:['부탁이니까 5점을 줘요.','직접 가보지 않아서 평가하기 어렵다고 설명해요.','이번에는 3점만 줘요.'],good:1,why:'별점도 다른 사람의 선택에 영향을 주는 데이터예요. 직접 경험하지 않았다면 경험한 것처럼 평가하지 않아요.'},
- {q:'친구가 돈을 받고 가짜 게임 리뷰를 100개 쓰자고 해요.',options:['재미있어 보이면 함께 써요.','들키지 않게 문장만 바꿔요.','거절하고, 거짓 리뷰가 다른 사람을 속일 수 있다고 말해요.'],good:2,why:'보상을 받는다는 이유로 경험을 꾸며 쓰면 사람들의 선택을 속이게 돼요. 실제 경험을 쓸 때에도 받은 혜택은 밝혀요.'},
- {q:'영상으로만 본 식당을 친구들에게 소개하고 싶어요.',options:['“영상에서 봤는데 가보고 싶어. 직접 먹어보진 않았어.”라고 해요.','“내가 먹어봤는데 최고야!”라고 해요.','“모두가 맛있다고 하니까 무조건 가!”라고 해요.'],good:0,why:'본 정보의 출처와 직접 경험한 내용을 구분해요. “영상에서 봤다”는 사실과 “가보고 싶다”는 생각은 솔직하게 말할 수 있어요.'}
+export const decisionLabels:Record<Decision,string>={keep:'남기기',remove:'제외하기',hold:'판단 보류'};
+export function ranking(removed:string[]=[]){return places.map(p=>{const list=reviews.filter(r=>r.place===p.id&&!removed.includes(r.id));return {...p,count:list.length,score:list.length?list.reduce((s,r)=>s+r.stars,0)/list.length:0}}).sort((a,b)=>b.score-a.score||a.id-b.id)}
+export const fakeIds=reviews.filter(r=>r.verdict==='remove').map(r=>r.id);
+export const initialRank=ranking();
+export const cleanRank=ranking(fakeIds);
+export function judgeReview(id:string,decision:Decision,opened:number[]){const r=reviews.find(x=>x.id===id);if(!r)return 'missing';if(!opened.includes(r.decisive))return 'evidence';return r.verdict===decision?'correct':'retry'}
+export function policyRemoved(policy:string){if(policy==='low')return reviews.filter(r=>r.stars<=2).map(r=>r.id);if(policy==='report')return reviews.filter(r=>r.reported).map(r=>r.id);if(policy==='verify')return fakeIds;return []}
+export const policies=[
+ {id:'low',title:'낮은 별점은 모두 숨긴다',consequence:'칭찬 조작은 남고, 실제로 불편했던 손님의 목소리까지 사라졌어요. 평균이 올라가도 정보가 더 믿을 만해진 것은 아니에요.',voices:['손님: “기다렸다는 후기를 못 봐서 선택에 참고하지 못했어요.”','가게: “진짜 문제를 고칠 기회도 놓치겠네요.”']},
+ {id:'report',title:'신고가 들어오면 바로 삭제한다',consequence:'신고된 가짜 일부는 빠졌지만, 실제 경험과 확인 중인 리뷰도 함께 사라졌어요. 신고만으로 진위를 확정할 수는 없어요.',voices:['손님: “제가 직접 겪은 일인데 신고 때문에 지워졌어요.”','가게: “누군가 마음에 안 드는 후기를 계속 신고하면 어떡하죠?”']},
+ {id:'verify',title:'근거를 확인하고 조작된 리뷰만 제외한다',consequence:'확인된 조작 7개를 제외했어요. 실제 비판은 남기고, 자료가 부족한 글은 추가 확인을 기다려요. 결과를 설명하고 이의 제기도 받을 수 있어야 해요.',voices:['손님: “좋은 점과 불편한 점을 함께 보고 고를 수 있어요.”','가게: “거짓 공격을 바로잡고 실제 불편은 개선할 수 있어요.”']}
 ];
-
+export const ethics=[
+ {title:'가본 적 없는 식당',question:'가족이 “이 식당 별점 5점 눌러 줘”라고 부탁해요. 나는 가본 적이 없어요.',choices:['부탁이니까 5점을 준다','직접 가보지 않아 평가할 수 없다고 말한다','무난하게 3점을 준다'],answer:1,principle:'정직함',why:'경험하지 않은 일을 경험한 것처럼 평가하지 않아요. 별점 하나도 다른 사람의 선택에 영향을 줘요.',impact:'다음 손님이 실제 방문자의 평가라고 오해하는 일을 막을 수 있어요.'},
+ {title:'너무 매웠던 음식',question:'내 입맛에는 음식이 너무 매웠어요. 어떻게 쓰면 좋을까요?',choices:['“누구도 못 먹을 음식이에요.”','“여긴 최악이니까 절대 가지 마세요.”','“제 입맛에는 매웠어요. 매운맛에 약한 분은 참고하세요.”'],answer:2,principle:'정확함',why:'내 취향을 모든 사람의 사실처럼 말하지 않아요. 솔직한 불만도 구체적으로 쓰면 도움이 돼요.',impact:'매운 음식을 좋아하는 사람과 어려워하는 사람이 각자 판단할 수 있어요.'},
+ {title:'속상했던 응대',question:'직원의 응대가 불친절해서 속상해요. 리뷰에 무엇을 담을까요?',choices:['불편했던 행동을 설명하되 직원 이름과 얼굴은 공개하지 않는다','직원 얼굴 사진과 이름을 올린다','화가 난 만큼 욕설을 쓴다'],answer:0,principle:'배려와 개인정보 보호',why:'문제가 된 행동은 비판할 수 있어요. 신상을 공개하거나 모욕할 필요는 없어요.',impact:'불편을 전달하면서도 다른 사람의 개인정보와 존엄을 보호해요.'},
+ {title:'리뷰를 쓰면 선물을 준대요',question:'식사 후 선물을 줄 테니 칭찬 리뷰를 써 달라고 해요.',choices:['선물은 숨기고 아쉬운 점도 좋았다고 쓴다','방문 경험은 솔직하게 쓰고 제공받은 혜택을 밝힌다','선물을 받았으니 실제보다 높은 점수를 준다'],answer:1,principle:'투명함',why:'혜택을 받았다면 그 사실을 밝혀요. 받은 혜택이 경험을 꾸미는 이유가 될 수는 없어요.',impact:'읽는 사람이 리뷰의 배경을 알고 판단할 수 있어요.'},
+ {title:'내가 잘못 쓴 정보',question:'리뷰에 30분 기다렸다고 썼는데, 기록을 보니 10분이었어요.',choices:['이미 올렸으니 그대로 둔다','아무도 모르니까 괜찮다','10분으로 수정하고 잘못 적었던 내용을 바로잡는다'],answer:2,principle:'책임감',why:'틀린 것을 알게 되면 고쳐요. 확인하지 않은 내용을 계속 퍼뜨리지 않는 것도 책임이에요.',impact:'가게가 부당한 평가를 받거나 다른 손님이 잘못 판단하는 일을 줄여요.'}
+];
