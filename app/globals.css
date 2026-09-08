@@ -13,3 +13,8 @@
 .creator-credit{margin-left:auto;text-align:right;white-space:nowrap}@media(max-width:650px){.creator-credit{display:block;margin-top:10px}}
 .activity-notice{margin-top:18px;padding:18px 20px;border:1px solid #d4ddea;border-radius:12px;background:#f7f9fc;color:#44536c;font-size:15px;line-height:1.8}.activity-notice strong{display:block;font-size:16px;color:#243c61;margin-bottom:5px}.activity-notice p{margin:0}.activity-footer{align-items:flex-end;gap:20px;margin-top:24px}.activity-footer .activity-notice{margin-top:0;flex:1}.activity-footer .creator-credit{padding-bottom:4px}@media(max-width:650px){.activity-footer .creator-credit{margin-top:16px}.notice-break{display:none}}
 .activity-footer{display:flex;flex-direction:column;align-items:stretch;gap:12px}.activity-footer .activity-notice{width:100%;flex:none}.activity-footer .creator-credit{display:block;align-self:flex-end;margin:0;padding:0;text-align:right}
+
+/* Keep every answer choice on its own full-width row. */
+[data-slot="radio-group"]{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;width:100%!important}
+.review-decision .choice{min-width:0;align-items:center;line-height:1.5}
+.review-decision .choice>span:last-child{min-width:0;word-break:keep-all;overflow-wrap:break-word}
